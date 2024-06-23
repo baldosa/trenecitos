@@ -1,11 +1,13 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 </script>
 
 <template>
   <header>
     <figure>
-      <img src="/logo.png" />
+      <a href="/">
+        <img src="/logo.png" />
+      </a>
     </figure>
   </header>
   <main class="container">

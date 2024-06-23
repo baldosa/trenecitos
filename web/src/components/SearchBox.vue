@@ -11,12 +11,10 @@ fetch(`${import.meta.env.VITE_API_URL}/estaciones`)
   .then((response) => response.json())
   .then((data) => (estaciones = data))
 
-
 function search() {
-  const desdeId = estaciones.find(u => u.nombre === desde.value).id
-  const hastaId = estaciones.find(u => u.nombre === hasta.value).id
+  const desdeId = estaciones.find((u) => u.nombre === desde.value).id
+  const hastaId = estaciones.find((u) => u.nombre === hasta.value).id
   router.push(`/trenes/?desde=${desdeId}&hasta=${hastaId}`)
-
 }
 </script>
 
@@ -25,7 +23,14 @@ function search() {
     <div class="row">
       <div class="col-6">
         <label for="estacion-desde">¿Desde dónde?</label>
-        <input type="text" id="desde" name="desde" list="desde-list" v-model="desde" />
+        <input
+          type="text"
+          id="desde"
+          name="desde"
+          list="desde-list"
+          v-model="desde"
+          placeholder="comenzá a tipear..."
+        />
         <datalist id="desde-list">
           <option v-for="i in estaciones">{{ i.nombre }}</option>
         </datalist>
