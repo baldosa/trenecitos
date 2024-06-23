@@ -1,5 +1,7 @@
 import os
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import FastAPI, Depends, Request
+from fastapi.exceptions import HTTPException
+from fastapi.responses import HTMLResponse
 from sqlmodel import Session, select
 from contextlib import asynccontextmanager
 from typing import Union
@@ -11,7 +13,6 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api_auth import gen_user, gen_passwd
 
-from pydantic import BaseModel, field_validator
 import requests
 
 
@@ -48,20 +49,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="ChimichangApp",
-    description="asdasdasds",
-    summary="Deadpool's favorite app. Nuff said.",
+    title="TrenecitosAPI",
+    description="¿Cuándo llega mi tren?",
     version="0.0.1",
-    terms_of_service="http://example.com/terms/",
-    contact={
-        "name": "Deadpoolio the Amazing",
-        "url": "http://x-force.example.com/contact/",
-        "email": "dp@x-force.example.com",
-    },
-    license_info={
-        "name": "Apache 2.0",
-        "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
-    },
     docs_url="/api/docs",
     lifespan=lifespan,
 )
@@ -72,12 +62,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.get("/api/ping")
-async def pong():
-    return {"message": data["token"]}
-
 
 @app.get("/api/lineas")
 async def lineas():
@@ -287,5 +271,8 @@ async def trenes(desde: int = 0, hasta: int = 0):
             results = {"total": response["total"], "trenes": trenes}
             return results
 
+@app.exception_handler(404)
+async def redirect_all_requests_to_frontend(request: Request, exc: HTTPException):
+    return HTMLResponse(open("public/index.html").read())
 
-app.mount("/", StaticFiles(directory="web", html=True), name="frontend")
+app.mount("/", StaticFiles(directory="public", html=True), name="public")
