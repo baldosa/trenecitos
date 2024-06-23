@@ -11,10 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: |
-          echo ${{ secrets.ENV }} >> .env
-          echo ${{ secrets.API_AUTH_FILE }} >> app/api_auth.py
-          flyctl deploy --remote-only
-        shell: bash
+      - shell: bash
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          ENV: ${{ secrets.ENV }}
+          API_AUTH_FILE: ${{ secrets.API_AUTH_FILE }}
+
+        run: |
+          echo $ENV >> .env
+          echo $API_AUTH_FILE >> app/api_auth.py
+          flyctl deploy --remote-only
