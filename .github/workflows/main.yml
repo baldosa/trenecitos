@@ -1,0 +1,20 @@
+name: Fly Deploy
+on:
+  push:
+    branches:
+      - main    # change to main if needed
+jobs:
+  deploy:
+    name: Deploy app
+    runs-on: ubuntu-latest
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: |
+          echo $ENV &gt;&gt; .env
+          echo $API_AUTH_FILE &gt;&gt; app/api_auth.py
+          flyctl deploy --remote-only
+        shell: bash
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
