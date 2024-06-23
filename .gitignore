@@ -29,6 +29,8 @@ coverage
 
 *.tsbuildinfo
 
+public/
+
 app/api_auth.py
 *.ipynb
 # Byte-compiled / optimized / DLL files
