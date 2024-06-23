@@ -7,7 +7,6 @@ const service = ref(null)
 fetch(`${import.meta.env.VITE_API_URL}/lineas`)
   .then((response) => response.json())
   .then((data) => (service.value = data))
-console.log(import.meta.env.VITE_API_URL)
 </script>
 
 <template>
