@@ -1,22 +1,35 @@
-![Trenecitos!](/web/public/logo.png "Logo")
+# web
 
-La app de trenes argentinos pretende que me registre para guardar mis favoritos, tambien tarda mil años en cargar estaciones y otras cosas que aún no se.
+This template should help get you started developing with Vue 3 in Vite.
 
-Usando la información de la api a la que le pega la app armé esto con Fastpi y Vue que originalmente iba a ser un bot de telegram pero terminó siendo esto.
+## Recommended IDE Setup
 
-### Ejecutar
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-Con Python >= 3.12 y node =>18.20, editá el .env.example.
-En el root corrés la api
+## Customize configuration
 
+See [Vite Configuration Reference](https://vitejs.dev/config/).
+
+## Project Setup
+
+```sh
+npm install
 ```
-fastapi dev main.py
-```
 
-main.py espera que exista un archivo `app/api_auth.py` que genere user/pass para la api de sofse, no está en el repo
+### Compile and Hot-Reload for Development
 
-en `web/` corres el front
-
-```
+```sh
 npm run dev
+```
+
+### Compile and Minify for Production
+
+```sh
+npm run build
+```
+
+### Lint with [ESLint](https://eslint.org/)
+
+```sh
+npm run lint
 ```
