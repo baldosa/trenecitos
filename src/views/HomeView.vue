@@ -1,19 +1,13 @@
-<script setup>
-import { ref } from 'vue'
-import Linea from '../components/Linea.vue'
+<script setup lang="ts">
+
+import InfoLinea from '../components/InfoLinea.vue'
 import SearchBox from '../components/SearchBox.vue'
 
-const service = ref(null)
-fetch(`${import.meta.env.VITE_API_URL}/lineas`)
-  .then((response) => response.json())
-  .then((data) => (service.value = data))
 </script>
 
 <template>
   <div>
     <search-box />
-    <div v-for="i in service" :key="i.id">
-      <linea :linea="i" />
-    </div>
+    <info-linea />
   </div>
 </template>

@@ -1,4 +1,4 @@
-openapi: 3.0.2
+openapi: 3.1.0
 info:
   title: Trenes Argentinos API
   version: x.x.x
@@ -13,11 +13,58 @@ components:
       name: authorization
 
 paths:
+  /v1/auth/authorize:
+    post:
+      summary: Authorize
+      operationId: authorize
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        "401":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: "Unauthorized"
+                required:
+                  - status
+                  - message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "admin"
+                password:
+                  type: string
+                  example: "admin"
+              required:
+                - username
+                - password
   /v1/infraestructura/gerencias:
     get:
       security:
         - ApiKeyAuth: []
       summary: GET líneas de tren
+      operationId: getLineas
       responses:
         "200":
           description: OK
