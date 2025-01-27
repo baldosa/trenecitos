@@ -2,9 +2,16 @@ openapi: 3.1.0
 info:
   title: Trenes Argentinos API
   version: x.x.x
+  description: "API para obtener información de los trenes de SOFSE (Trenes Argentinos).
+    \ La API permite obtener información sobre las líneas de tren, ramales, estaciones y arribos.
+    \ La misma es la utilizada por la aplicación oficial de Trenes Argentinos (https://www.argentina.gob.ar/transporte/trenes-argentinos/app)"
+host: "api-servicios.sofse.gob.ar"
+basePath: "/v1"
+schemes:
+- "https"
 servers:
   - url: https://api-servicios.sofse.gob.ar
-    description: Horarios
+    description: Información de los trenes de SOFSE
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -15,7 +22,8 @@ components:
 paths:
   /v1/auth/authorize:
     post:
-      summary: Authorize
+      summary: Loguear usuario
+      description: Loguea un usuario y devuelve un token, el usuario y la contraseña se generan como se indica en este archivo https://github.com/baldosa/trenecitos/blob/main/src/helpers/index.js#L20
       operationId: authorize
       responses:
         "200":
@@ -63,7 +71,8 @@ paths:
     get:
       security:
         - ApiKeyAuth: []
-      summary: GET líneas de tren
+      summary: Trae las líneas de trenes
+      description: Trae las líneas de trenes operadas por SOFSE. Requiere idEmpresa que es igual a 1 para AMBA. Probablemente algún otro ID traiga otras líneas.
       operationId: getLineas
       responses:
         "200":
