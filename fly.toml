@@ -14,9 +14,8 @@ primary_region = 'ewr'
   auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
-  processes = ['app']
 
 [[vm]]
-  memory = '512mb'
+  memory = '256mb'
   cpu_kind = 'shared'
   cpus = 1
