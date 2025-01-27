@@ -41,5 +41,6 @@ FROM nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Start the server by default, this can be overwritten at runtime
+COPY ./deploy/trenecitos.conf /etc/nginx/conf.d/trenecitos.conf
 EXPOSE 80
 CMD [ "/usr/sbin/nginx", "-g", "daemon off;" ]
