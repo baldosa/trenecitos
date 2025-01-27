@@ -1,30 +1,41 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onBeforeMount } from 'vue';
 import { ref } from 'vue'
 
-import { RouterView } from 'vue-router'
+import { RouterView, useRouter } from 'vue-router'
 import { genUser, genPasswd, isTokenExpired, getToken, storeToken } from '@/helpers'
 import client from '@/api'
 
 const isMenuOpen = ref(false)
-
+const router = useRouter()
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
+const isAuthenticated = ref(false)
 
 async function login() {
-
   let authToken = getToken()
   if ((authToken === null) || isTokenExpired(authToken)) {
+
     const user = genUser()
     const passwd = genPasswd(user)
     const { data } = await client.POST("/v1/auth/authorize", {
       body: { username: user, password: passwd }
     })
     storeToken(data['token'])
+    isAuthenticated.value = true
+
+  } else {
+    isAuthenticated.value = true
   }
 }
-onMounted(() => login());
+onBeforeMount(() => login());
+
+const handleDocsClick = () => {
+  router.push({
+    name: 'docs',
+  });
+};
 </script>
 
 <template>
@@ -57,10 +68,10 @@ onMounted(() => login());
         :class="{ 'show-menu': isMenuOpen }"
       >
         <li class="pure-menu-item">
-          <a
-            href="#/docs"
+          <span
+            @click="handleDocsClick"
             class="pure-menu-link"
-          >API</a>
+          >API</span>
         </li>
         <li class="pure-menu-item">
           <a
@@ -76,7 +87,7 @@ onMounted(() => login());
 
   <!-- Main content -->
   <div class="content">
-    <RouterView />
+    <RouterView v-if="isAuthenticated" />
   </div>
 </template>
 
