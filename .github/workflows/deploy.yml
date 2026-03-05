@@ -1,0 +1,111 @@
+name: CI/CD con generacion de SBOM y escaneo de vulnerabilidades
+
+on:
+  push:
+    branches:
+      - main
+      - terraform-local
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: trenecitos
+  APP_NAME: trenecitos
+
+jobs:
+  build-and-scan:
+    name: Build, Scan and Push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 1. Configurar credenciales de AWS
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 2. Autenticarse en Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 3. Construir la imagen Docker
+      - name: Build Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+      # 4. Generar SBOM (Software Bill of Materials) con Syft
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          format: spdx-json
+          output-file: sbom.json
+
+      - name: Upload SBOM as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+
+      # 5. Análisis estático y de vulnerabilidades en la imagen (Trivy)
+      # Este paso detendrá el pipeline (exit-code 1) si encuentra vulnerabilidades HIGH o CRITICAL
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      # 6. Subir imagen a ECR (solo si el SBOM y el escaneo de seguridad pasaron sin errores)
+      - name: Push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: latest
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+  deploy:
+    name: Deploy to EC2 with Terraform
+    needs: build-and-scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # 7. Inicializar y aplicar infraestructura con Terraform (La EC2 tirará de la nueva imagen)
+      - name: Terraform Init
+        working-directory: terraform/aws
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: terraform/aws
+        run: terraform apply -auto-approve
+
+      - name: Show New Public IP
+        working-directory: terraform/aws
+        run: terraform output vm_public_ip

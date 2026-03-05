@@ -108,12 +108,7 @@ const handleSubmit = () => {
         >{{ errorMessage }}</span>
       </div>
       <div class="button-group">
-        <button
-          type="submit"
-          class="pure-button pure-button-primary"
-        >
-          Buscar
-        </button>
+        <button type="submit" class="pure-button pure-button-primary">Buscar</button>
       </div>
     </fieldset>
   </form>

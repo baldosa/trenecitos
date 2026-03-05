@@ -1,2 +1,22 @@
 node_modules
 dist
+# Archivos de configuración local de Terraform
+.terraform/
+
+# Archivos de estado (contienen datos sensibles en texto plano)
+*.tfstate
+*.tfstate.*
+
+# Variables de entorno y secretos (donde sueles poner tus credenciales)
+*.tfvars
+*.tfvars.json
+
+# Archivos de respaldo y temporales
+*.backup
+*.lock.hcl
+
+# Archivo de plan (puede contener secretos si se exporta)
+tfplan
+
+# Logs de error
+crash.log
