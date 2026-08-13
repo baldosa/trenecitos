@@ -68,10 +68,18 @@ const handleDocsClick = () => {
         :class="{ 'show-menu': isMenuOpen }"
       >
         <li class="pure-menu-item">
-          <span
-            @click="handleDocsClick"
+          <a
+            href="/#/docs"
             class="pure-menu-link"
-          >API</span>
+          >
+            <i class="fa-regular fa-circle-question"></i>
+          </a>
+        </li>
+        <li class="pure-menu-item">
+          <a
+            href="/#/docs"
+            class="pure-menu-link"
+          >API</a>
         </li>
         <li class="pure-menu-item">
           <a
