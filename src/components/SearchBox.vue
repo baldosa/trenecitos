@@ -1,12 +1,16 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-const router = useRouter()
 
 import SearchField from './SearchField.vue'
 import DatePicker from './DatePicker.vue'
 import TimePicker from './TimePicker.vue'
 import TimeSlotPicker from './TimeSlotPicker.vue'
+import IconSwap from './icons/IconSwap.vue'
+import IconChevronDown from './icons/IconChevronDown.vue'
+import IconSearch from './icons/IconSearch.vue'
+
+const router = useRouter()
 
 const formData = ref({
   desde: null,
@@ -16,8 +20,19 @@ const formData = ref({
   searchType: null
 })
 
+const showAdvanced = ref(false)
 const error = ref(false)
 const errorMessage = ref('')
+
+function toggleAdvanced() {
+  showAdvanced.value = !showAdvanced.value
+}
+
+function swapStations() {
+  const desde = formData.value.desde
+  formData.value.desde = formData.value.hasta
+  formData.value.hasta = desde
+}
 
 const handleSubmit = () => {
   error.value = true;
@@ -57,128 +72,127 @@ const handleSubmit = () => {
 </script>
 
 <template>
-  <form
-    class="pure-form pure-form-stacked"
-    @submit.prevent="handleSubmit"
-  >
-    <fieldset>
-      <div class="pure-g">
-        <!-- Search Term 1 -->
-        <div class="pure-u-1 form-group">
-          <search-field
-            v-model="formData.desde"
-            label="Desde"
-            placeholder="Estación de salida"
-            :valid="error"
-            required
-          />
-        </div>
+  <form class="search-box card" @submit.prevent="handleSubmit">
+    <div class="search-box__stations">
+      <search-field
+        v-model="formData.desde"
+        label="Desde"
+        placeholder="Estación de salida"
+        :valid="error"
+        required
+      />
+      <button
+        type="button"
+        class="icon-btn search-box__swap"
+        @click="swapStations"
+        aria-label="Invertir estaciones"
+      >
+        <IconSwap />
+      </button>
+      <search-field
+        v-model="formData.hasta"
+        label="Hasta"
+        placeholder="Estación de llegada"
+        :valid="error"
+        required
+      />
+    </div>
 
-        <!-- Search Term 2 -->
-        <div class="pure-u-1 form-group">
-          <search-field
-            v-model="formData.hasta"
-            label="Hasta"
-            placeholder="Estación de llegada"
-            :valid="error"
-            required
-          />
-        </div>
+    <div class="search-box__quick">
+      <date-picker v-model="formData.selectedDate" />
+      <time-picker v-model="formData.selectedTime" />
+    </div>
 
-        <!-- Date and Time Container -->
-        <div class="pure-u-1 datetime-container">
-          <div class="datetime-field">
-            <time-slot-picker v-model="formData.searchType" />
-          </div>
-          <!-- Date Picker -->
-          <div class="datetime-field">
-            <date-picker v-model="formData.selectedDate" />
-          </div>
+    <span class="search-box__error" v-if="error">{{ errorMessage }}</span>
 
-          <!-- Time Picker -->
-          <div class="datetime-field">
-            <time-picker v-model="formData.selectedTime" />
-          </div>
-        </div>
-      </div>
-      <div class="pure-u-1 form-group">
-        <span
-          class="error"
-          v-if="error"
-        >{{ errorMessage }}</span>
-      </div>
-      <div class="button-group">
-        <button
-          type="submit"
-          class="pure-button pure-button-primary"
-        >
-          Buscar
-        </button>
-      </div>
-    </fieldset>
+    <button type="submit" class="pure-button pure-button-primary search-box__submit">
+      <IconSearch />
+      Buscar trenes
+    </button>
+
+    <button type="button" class="search-box__advanced-toggle" @click="toggleAdvanced">
+      Opciones avanzadas
+      <IconChevronDown :class="{ 'is-open': showAdvanced }" />
+    </button>
+
+    <div v-if="showAdvanced" class="search-box__advanced">
+      <time-slot-picker v-model="formData.searchType" />
+    </div>
   </form>
 </template>
 
 <style scoped>
-.pure-form {
+.search-box {
   max-width: 850px;
   margin: 0 auto;
+  padding: var(--space-5);
 }
 
-.form-group {
-  padding: 0 1rem;
-  margin-bottom: 1rem;
-
-}
-
-.datetime-container {
+.search-box__stations {
   display: flex;
-  gap: 2rem;
-  padding: 0 1rem;
-  margin-bottom: 1rem;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
-.datetime-field {
-  flex: 1;
+.search-box__swap {
+  align-self: center;
+  font-size: 1.1rem;
 }
 
-.button-group {
+.search-box__quick {
   display: flex;
-  gap: 1rem;
-  padding: 0 1rem;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
-.error {
-  color: rgb(156, 27, 27);
-  gap: 1rem;
-  padding: 0 1rem;
-  margin-top: 10px;
+.search-box__error {
+  display: block;
+  color: #dc2626;
+  font-size: 0.9rem;
+  margin-bottom: var(--space-3);
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 48em) {
+.search-box__submit {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  font-size: 1rem;
+}
 
-  .form-group,
-  .button-group {
-    padding: 0;
-  }
+.search-box__advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: var(--space-3);
+}
 
-  .datetime-container {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 0;
-  }
+.search-box__advanced-toggle :deep(svg) {
+  transition: transform 0.2s ease;
+}
 
-  .datetime-field {
-    width: 100%;
-  }
+.search-box__advanced-toggle :deep(svg.is-open) {
+  transform: rotate(180deg);
+}
 
-  .button-group {
-    flex-direction: column;
-  }
+.search-box__advanced {
+  margin-top: var(--space-3);
+}
 
-  .pure-button {
-    width: 100%;
+@media (min-width: 48em) {
+  .search-box__stations {
+    flex-direction: row;
+    align-items: flex-end;
   }
 }
 </style>

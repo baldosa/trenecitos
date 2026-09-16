@@ -17,6 +17,16 @@ const router = createRouter({
       component: () => import('../views/TrenesView.vue')
     },
     {
+      path: '/lineas/:id',
+      name: 'linea',
+      component: () => import('../views/LineView.vue')
+    },
+    {
+      path: '/lineas/:id/ramales/:ramalId',
+      name: 'ramal',
+      component: () => import('../views/RamalView.vue')
+    },
+    {
       path: '/docs',
       name: 'docs',
       component: () => import('../views/DocsView.vue')

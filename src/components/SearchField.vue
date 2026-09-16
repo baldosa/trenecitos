@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import client from '@/api'
 import { getToken } from '@/helpers'
+import IconClose from './icons/IconClose.vue'
 
 const props = defineProps({
   label: {
@@ -58,30 +59,28 @@ const handleClear = () => {
 </script>
 
 <template>
-  <div class="pure-control-group">
-    <label>{{ label }}</label>
-    <div class="input-wrapper">
+  <div class="search-field">
+    <label class="search-field__label">{{ label }}</label>
+    <div class="search-field__wrapper">
       <input
         type="string"
-        class="pure-input has-clear-button"
-        :class="valid ? '' : 'error'"
+        class="search-field__input"
+        :class="{ 'is-error': !valid }"
         :value="inputValue"
         :placeholder="placeholder"
         @input="handleInput"
-      >
+      />
       <button
         v-if="modelValue"
         type="button"
-        class="clear-button"
+        class="icon-btn search-field__clear"
         @click="handleClear"
         aria-label="Clear input"
       >
-        <i class="fas fa-times"></i>
+        <IconClose />
       </button>
-      <ul
-        v-if="filteredStations.length"
-        class="suggestions"
-      >
+
+      <ul v-if="filteredStations.length" class="search-field__suggestions card">
         <li
           v-for="station in filteredStations"
           :key="station.nombre"
@@ -90,85 +89,75 @@ const handleClear = () => {
           {{ station.nombre }}
         </li>
       </ul>
-
     </div>
   </div>
 </template>
 
 <style scoped>
-.input-wrapper {
+.search-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-field__label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  margin-bottom: var(--space-1);
+}
+
+.search-field__wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.pure-input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.search-field__input {
   width: 100%;
-  transition: border-color 0.2s ease;
-}
-
-.pure-input.has-clear-button {
+  box-sizing: border-box;
+  padding: var(--space-2) var(--space-3);
   padding-right: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
 }
 
-.pure-input:focus {
-  border-color: #129FEA;
+.search-field__input:focus {
   outline: none;
+  border-color: var(--color-primary);
 }
 
-.error {
-  border-color: red;
-  outline: none;
+.search-field__input.is-error {
+  border-color: #dc2626;
 }
 
-.clear-button {
+.search-field__clear {
   position: absolute;
-  right: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #666;
-  padding: 4px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+  right: var(--space-2);
 }
 
-.clear-button:hover {
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-.clear-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(18, 159, 234, 0.2);
-}
-
-.suggestions {
+.search-field__suggestions {
   position: absolute;
-  top: 100%;
+  top: calc(100% + var(--space-1));
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #ccc;
   z-index: 1000;
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: var(--space-1) 0;
+  max-height: 240px;
+  overflow-y: auto;
 }
 
-.suggestions li {
-  padding: 0.5rem;
+.search-field__suggestions li {
+  padding: var(--space-2) var(--space-3);
   cursor: pointer;
+  font-size: 0.9rem;
 }
 
-.suggestions li:hover {
-  background: #f0f0f0;
-
+.search-field__suggestions li:hover {
+  background: var(--color-bg);
 }
 </style>

@@ -1,41 +1,63 @@
 <script setup>
-const props = defineProps({
+import IconCalendar from './icons/IconCalendar.vue'
+
+defineProps({
   modelValue: {
     type: String,
     default: ''
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+defineEmits(['update:modelValue'])
 </script>
 
 <template>
-  <div class="pure-control-group">
+  <label class="pill-field">
+    <IconCalendar class="pill-field__icon" />
+    <span class="pill-field__label">{{ modelValue || 'Hoy' }}</span>
     <input
       type="date"
-      class="pure-input"
+      class="pill-field__input"
       :value="modelValue"
-      @input="$emit('update:modelValue', $event.target.value)"
       :min="new Date().toISOString().slice(0, 10)"
-    >
-  </div>
+      @input="$emit('update:modelValue', $event.target.value)"
+    />
+  </label>
 </template>
 
 <style scoped>
-.pure-control-group {
-  margin-bottom: 1rem;
+.pill-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  flex: 1;
 }
 
+.pill-field__icon {
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
 
-.pure-input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.pill-field__label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pill-field__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
   width: 100%;
-}
-
-.pure-input:focus {
-  border-color: #129FEA;
-  outline: none;
 }
 </style>

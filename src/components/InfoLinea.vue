@@ -1,12 +1,8 @@
 <script setup>
-
-import { ref } from 'vue'
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue'
 import client from '@/api'
 import { getToken } from '@/helpers'
-
-import Linea from './Linea.vue'
-
+import LineCard from './LineCard.vue'
 
 const lineas = ref([])
 
@@ -23,38 +19,23 @@ onMounted(() => {
     lineas.value = data
   })
 });
-
-
-const expandedLines = ref(new Set())
-
-
-const toggleExpand = (lineId) => {
-  if (expandedLines.value.has(lineId)) {
-    expandedLines.value.delete(lineId)
-  } else {
-    expandedLines.value.add(lineId)
-  }
-}
-
-const isExpanded = (lineId) => expandedLines.value.has(lineId)
 </script>
 
 <template>
-  <div class="status-list">
-    <linea
-      v-for="line in lineas"
-      :key="line.id"
-      :line="line"
-      :isExpanded="isExpanded(line.id)"
-      @toggle="toggleExpand"
-    />
+  <div class="lineas-list">
+    <h2 class="lineas-list__title">Líneas</h2>
+    <LineCard v-for="linea in lineas" :key="linea.id" :linea="linea" />
   </div>
 </template>
 
 <style scoped>
-.status-list {
+.lineas-list {
   max-width: 800px;
-  margin: 0 auto;
-  padding: 1rem;
+  margin: var(--space-6) auto 0;
+}
+
+.lineas-list__title {
+  margin: 0 0 var(--space-3);
+  font-size: 1.2rem;
 }
 </style>

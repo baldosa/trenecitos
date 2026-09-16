@@ -10,15 +10,14 @@ const emit = defineEmits(['update:modelValue'])
 </script>
 
 <template>
-  <div class="pure-control-group">
+  <div class="timeslot-field">
+    <label class="timeslot-field__label">Tipo de búsqueda</label>
     <select
       :value="modelValue"
-      class="pure-input"
+      class="pure-input timeslot-field__select"
+      @change="$emit('update:modelValue', $event.target.value)"
     >
-      <option
-        value=""
-        disabled
-      >¿Arribo o partida?</option>
+      <option value="" disabled>¿Arribo o partida?</option>
       <option value="partida">Partida</option>
       <option value="arribo">Arribo</option>
     </select>
@@ -26,20 +25,16 @@ const emit = defineEmits(['update:modelValue'])
 </template>
 
 <style scoped>
-.pure-control-group {
-  margin-bottom: 1rem;
+.timeslot-field__label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  margin-bottom: var(--space-1);
 }
 
-
-.pure-input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.timeslot-field__select {
   width: 100%;
-}
-
-.pure-input:focus {
-  border-color: #129FEA;
-  outline: none;
+  box-sizing: border-box;
 }
 </style>
