@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
-    "gen-api": "npx openapi-typescript spec/schema.yml -o ./src/api/schema.d.ts"
+    "gen-api": "npx openapi-typescript public/schema.yml -o ./src/api/schema.d.ts"
   },
   "dependencies": {
     "openapi-fetch": "^0.13.4",

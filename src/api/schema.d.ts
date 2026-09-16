@@ -13,7 +13,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Authorize */
+        /**
+         * Loguear usuario
+         * @description Loguea un usuario y devuelve un token, el usuario y la contraseña se generan como se indica en este archivo https://github.com/baldosa/trenecitos/blob/main/src/helpers/index.js#L20
+         */
         post: operations["authorize"];
         delete?: never;
         options?: never;
@@ -28,7 +31,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET líneas de tren */
+        /**
+         * Trae las líneas de trenes
+         * @description Trae las líneas de trenes operadas por SOFSE. Requiere idEmpresa que es igual a 1 para AMBA. Probablemente algún otro ID traiga otras líneas.
+         */
         get: operations["getLineas"];
         put?: never;
         post?: never;
