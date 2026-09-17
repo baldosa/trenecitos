@@ -3,8 +3,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import SearchField from './SearchField.vue'
-import DatePicker from './DatePicker.vue'
-import TimePicker from './TimePicker.vue'
 import TimeSlotPicker from './TimeSlotPicker.vue'
 import IconSwap from './icons/IconSwap.vue'
 import IconChevronDown from './icons/IconChevronDown.vue'
@@ -78,7 +76,8 @@ const handleSubmit = () => {
         v-model="formData.desde"
         label="Desde"
         placeholder="Estación de salida"
-        :valid="error"
+        :has-error="error"
+        :related-station="formData.hasta"
         required
       />
       <button
@@ -93,14 +92,10 @@ const handleSubmit = () => {
         v-model="formData.hasta"
         label="Hasta"
         placeholder="Estación de llegada"
-        :valid="error"
+        :has-error="error"
+        :related-station="formData.desde"
         required
       />
-    </div>
-
-    <div class="search-box__quick">
-      <date-picker v-model="formData.selectedDate" />
-      <time-picker v-model="formData.selectedTime" />
     </div>
 
     <span class="search-box__error" v-if="error">{{ errorMessage }}</span>
@@ -116,6 +111,27 @@ const handleSubmit = () => {
     </button>
 
     <div v-if="showAdvanced" class="search-box__advanced">
+      <div class="search-box__advanced-fields">
+        <div class="search-box__advanced-field">
+          <label for="search-date">Fecha</label>
+          <input
+            id="search-date"
+            type="date"
+            class="field-input"
+            v-model="formData.selectedDate"
+            :min="new Date().toISOString().slice(0, 10)"
+          />
+        </div>
+        <div class="search-box__advanced-field">
+          <label for="search-time">Hora</label>
+          <input
+            id="search-time"
+            type="time"
+            class="field-input"
+            v-model="formData.selectedTime"
+          />
+        </div>
+      </div>
       <time-slot-picker v-model="formData.searchType" />
     </div>
   </form>
@@ -138,12 +154,6 @@ const handleSubmit = () => {
 .search-box__swap {
   align-self: center;
   font-size: 1.1rem;
-}
-
-.search-box__quick {
-  display: flex;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
 }
 
 .search-box__error {
@@ -187,6 +197,24 @@ const handleSubmit = () => {
 
 .search-box__advanced {
   margin-top: var(--space-3);
+}
+
+.search-box__advanced-fields {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.search-box__advanced-field {
+  flex: 1;
+}
+
+.search-box__advanced-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-muted);
+  margin-bottom: var(--space-1);
 }
 
 @media (min-width: 48em) {

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import TrainCard from '@/components/TrainCard.vue'
 import BackButton from '@/components/BackButton.vue'
 import IconSwap from '@/components/icons/IconSwap.vue'
+import { fetchTrainArrivals } from '@/composables/useTrainArrivals'
 const routerQuery = useRoute()
 const router = useRouter()
 const formData = ref({})
@@ -11,20 +12,14 @@ const searchData = ref({})
 
 const trainArrivals = ref([])
 
-import client from '@/api'
-import { getToken } from '@/helpers'
-
-
 const searchStations = async () => {
-  const authToken = getToken();
-  const { data } = await client.GET("/v1/arribos/estacion/{id}", {
-    headers: { authorization: authToken },
-    params: {
-      path: { id: parseInt(searchData.value.desde) },
-      query: { hasta: parseInt(searchData.value.hasta), tipoBusqueda: formData.value.searchType, fecha: formData.value.selectedDate, hora: formData.value.selectedTime }
-    }
+  return fetchTrainArrivals({
+    desde: searchData.value.desde,
+    hasta: searchData.value.hasta,
+    tipoBusqueda: formData.value.searchType,
+    fecha: formData.value.selectedDate,
+    hora: formData.value.selectedTime
   })
-  return data
 }
 
 const reverseSearch = async () => {

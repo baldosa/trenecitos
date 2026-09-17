@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import client from '@/api'
-import { getToken } from '@/helpers'
 import { lineColor } from '@/helpers/lineColors'
 import BackButton from '@/components/BackButton.vue'
 import RamalRow from '@/components/RamalRow.vue'
@@ -13,17 +12,12 @@ const linea = ref(null)
 const ramales = ref([])
 
 async function getLineas() {
-  const authToken = getToken()
-  const { data } = await client.GET('/v1/infraestructura/gerencias', {
-    headers: { authorization: authToken }
-  })
+  const { data } = await client.GET('/v1/infraestructura/gerencias')
   return data
 }
 
 async function getRamales(idGerencia) {
-  const authToken = getToken()
   const { data } = await client.GET('/v1/infraestructura/ramales', {
-    headers: { authorization: authToken },
     params: { query: { idGerencia } }
   })
   return data

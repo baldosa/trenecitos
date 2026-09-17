@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import client from '@/api'
-import { getToken } from '@/helpers'
 import IconClose from './icons/IconClose.vue'
 
 const props = defineProps({
@@ -17,21 +16,34 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  valid: {
+  hasError: {
     type: Boolean,
     default: false
+  },
+  // The station currently selected in the "other" field (Desde/Hasta), if
+  // any. When set, suggestions are narrowed to stations that share at
+  // least one ramal with it — the same connectivity check handleSubmit
+  // already does, applied ahead of time so you can't pick two stations
+  // that aren't on the same line to begin with.
+  relatedStation: {
+    type: Object,
+    default: null
   }
 })
 
 const searchStations = async (query) => {
-  const authToken = getToken();
   const { data } = await client.GET("/v1/infraestructura/estaciones", {
-    headers: { authorization: authToken },
     params: {
       query: { nombre: query }
     }
   })
-  return data
+  const relatedRamales = props.relatedStation?.incluida_en_ramales
+  if (!relatedRamales) {
+    return data
+  }
+  return data.filter((station) =>
+    station.incluida_en_ramales.some((ramalId) => relatedRamales.includes(ramalId))
+  )
 }
 
 const inputValue = ref('');
@@ -64,8 +76,8 @@ const handleClear = () => {
     <div class="search-field__wrapper">
       <input
         type="string"
-        class="search-field__input"
-        :class="{ 'is-error': !valid }"
+        class="field-input search-field__input"
+        :class="{ 'is-error': hasError }"
         :value="inputValue"
         :placeholder="placeholder"
         @input="handleInput"
@@ -114,19 +126,7 @@ const handleClear = () => {
 }
 
 .search-field__input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-2) var(--space-3);
   padding-right: 2rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-sans);
-  font-size: 0.95rem;
-}
-
-.search-field__input:focus {
-  outline: none;
-  border-color: var(--color-primary);
 }
 
 .search-field__input.is-error {

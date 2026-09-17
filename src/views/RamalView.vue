@@ -1,33 +1,22 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import client from '@/api'
-import { getToken } from '@/helpers'
+import { fetchTrainArrivals } from '@/composables/useTrainArrivals'
 import BackButton from '@/components/BackButton.vue'
 import AlertBanner from '@/components/AlertBanner.vue'
+import TrainCard from '@/components/TrainCard.vue'
 import IconMapPin from '@/components/icons/IconMapPin.vue'
 
 const route = useRoute()
-const router = useRouter()
 const ramal = ref(null)
+const trainArrivals = ref([])
 
 async function getRamales(idGerencia) {
-  const authToken = getToken()
   const { data } = await client.GET('/v1/infraestructura/ramales', {
-    headers: { authorization: authToken },
     params: { query: { idGerencia } }
   })
   return data
-}
-
-function goToTrenes() {
-  router.push({
-    name: 'trenes',
-    query: {
-      desde: ramal.value.id_estacion_inicial,
-      hasta: ramal.value.id_estacion_final
-    }
-  })
 }
 
 onMounted(async () => {
@@ -35,6 +24,13 @@ onMounted(async () => {
   const ramalId = parseInt(route.params.ramalId)
   const ramales = await getRamales(lineaId)
   ramal.value = ramales.find((entry) => entry.id === ramalId) || null
+
+  if (ramal.value) {
+    trainArrivals.value = await fetchTrainArrivals({
+      desde: ramal.value.id_estacion_inicial,
+      hasta: ramal.value.id_estacion_final
+    })
+  }
 })
 </script>
 
@@ -64,12 +60,28 @@ onMounted(async () => {
 
       <p class="ramal-view__meta">{{ ramal.estaciones }} estaciones</p>
 
-      <button type="button" class="pure-button pure-button-primary" @click="goToTrenes">
-        Ver próximos trenes
-      </button>
-
       <div v-if="ramal.alerta && ramal.alerta.length > 0" class="ramal-view__alerts">
         <AlertBanner v-for="alert in ramal.alerta" :key="alert.id" :alert="alert" />
+      </div>
+
+      <div class="ramal-view__trains">
+        <h2 class="ramal-view__trains-title">Próximos trenes</h2>
+        <p v-if="trainArrivals.results" class="ramal-view__trains-count">
+          {{ trainArrivals.total }} servicios encontrados
+        </p>
+        <div v-if="trainArrivals.results" class="ramal-view__trains-list">
+          <TrainCard
+            v-for="(tren, index) in trainArrivals.results"
+            :key="tren.servicio.id"
+            :tren="tren"
+            :startId="ramal.id_estacion_inicial"
+            :destinationId="ramal.id_estacion_final"
+            :isNext="index === 0"
+          />
+        </div>
+        <p v-else class="ramal-view__trains-empty">
+          No hay trenes disponibles en este momento
+        </p>
       </div>
     </div>
   </div>
@@ -124,5 +136,26 @@ onMounted(async () => {
 
 .ramal-view__alerts {
   margin-top: var(--space-4);
+}
+
+.ramal-view__trains {
+  margin-top: var(--space-5);
+}
+
+.ramal-view__trains-title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.1rem;
+}
+
+.ramal-view__trains-count {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  margin: 0 0 var(--space-3);
+}
+
+.ramal-view__trains-empty {
+  text-align: center;
+  padding: var(--space-5) var(--space-4);
+  color: var(--color-muted);
 }
 </style>

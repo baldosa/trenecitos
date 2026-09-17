@@ -1,16 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import client from '@/api'
-import { getToken } from '@/helpers'
 import LineCard from './LineCard.vue'
 
 const lineas = ref([])
 
 async function getLineas() {
-  const authToken = getToken();
-  const { data } = await client.GET("/v1/infraestructura/gerencias", {
-    headers: { authorization: authToken }
-  })
+  const { data } = await client.GET("/v1/infraestructura/gerencias")
   return data
 }
 

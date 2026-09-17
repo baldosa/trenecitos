@@ -11,15 +11,16 @@ const emit = defineEmits(['update:modelValue'])
 
 <template>
   <div class="timeslot-field">
-    <label class="timeslot-field__label">Tipo de búsqueda</label>
+    <label for="search-time-type" class="timeslot-field__label">La fecha y hora son de</label>
     <select
+      id="search-time-type"
       :value="modelValue"
-      class="pure-input timeslot-field__select"
+      class="field-input"
       @change="$emit('update:modelValue', $event.target.value)"
     >
-      <option value="" disabled>¿Arribo o partida?</option>
-      <option value="partida">Partida</option>
-      <option value="arribo">Arribo</option>
+      <option value="" disabled>¿Salida o llegada?</option>
+      <option value="partida">Salida (tomo el tren a esa hora)</option>
+      <option value="arribo">Llegada (quiero llegar a esa hora)</option>
     </select>
   </div>
 </template>
@@ -31,10 +32,5 @@ const emit = defineEmits(['update:modelValue'])
   font-weight: 500;
   color: var(--color-muted);
   margin-bottom: var(--space-1);
-}
-
-.timeslot-field__select {
-  width: 100%;
-  box-sizing: border-box;
 }
 </style>

@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import client from '@/api'
-import { getToken } from '@/helpers'
 import { lineColor } from '@/helpers/lineColors'
 import IconChevronRight from './icons/IconChevronRight.vue'
 
@@ -17,9 +16,7 @@ const router = useRouter()
 const ramales = ref([])
 
 async function getRamales(idGerencia) {
-  const authToken = getToken()
   const { data } = await client.GET('/v1/infraestructura/ramales', {
-    headers: { authorization: authToken },
     params: { query: { idGerencia } }
   })
   return data

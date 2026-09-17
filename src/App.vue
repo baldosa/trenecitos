@@ -1,34 +1,38 @@
 <script setup>
 import { onBeforeMount, ref } from 'vue'
 import { RouterView } from 'vue-router'
-import { genUser, genPasswd, isTokenExpired, getToken, storeToken } from '@/helpers'
-import client from '@/api'
+import { ensureToken } from '@/auth'
 import AppHeader from '@/components/AppHeader.vue'
 
-const isAuthenticated = ref(false)
+const status = ref('loading') // 'loading' | 'ready' | 'error'
 
-async function login() {
-  let authToken = getToken()
-  if (authToken === null || isTokenExpired(authToken)) {
-    const user = genUser()
-    const passwd = genPasswd(user)
-    const { data } = await client.POST('/v1/auth/authorize', {
-      body: { username: user, password: passwd }
-    })
-    storeToken(data['token'])
-    isAuthenticated.value = true
-  } else {
-    isAuthenticated.value = true
+async function bootstrap() {
+  status.value = 'loading'
+  try {
+    await ensureToken()
+    status.value = 'ready'
+  } catch (err) {
+    console.error('No se pudo iniciar sesión:', err)
+    status.value = 'error'
   }
 }
 
-onBeforeMount(() => login())
+onBeforeMount(bootstrap)
 </script>
 
 <template>
   <AppHeader />
   <main class="app-content">
-    <RouterView v-if="isAuthenticated" />
+    <div v-if="status === 'loading'" class="app-status">
+      Cargando…
+    </div>
+    <div v-else-if="status === 'error'" class="app-status">
+      <p>No pudimos conectar con el servicio.</p>
+      <button type="button" class="pure-button pure-button-primary" @click="bootstrap">
+        Reintentar
+      </button>
+    </div>
+    <RouterView v-else />
   </main>
 </template>
 
@@ -37,5 +41,11 @@ onBeforeMount(() => login())
   max-width: 1200px;
   margin: 0 auto;
   padding: calc(60px + var(--space-5)) var(--space-4) var(--space-6);
+}
+
+.app-status {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  color: var(--color-muted);
 }
 </style>
