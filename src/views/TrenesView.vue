@@ -27,38 +27,40 @@ const reverseSearch = async () => {
   searchData.value.desde = searchData.value.hasta
   searchData.value.hasta = desde
   formData.value = {
+    ...formData.value,
     desde: formData.value.hasta,
     hasta: formData.value.desde
   }
+  router.replace({
+    name: 'trenes',
+    query: {
+      ...routerQuery.query,
+      desde: searchData.value.desde,
+      hasta: searchData.value.hasta
+    }
+  })
   trainArrivals.value = await searchStations()
 }
 
 onMounted(async () => {
-  if (routerQuery.query.desde && routerQuery.query.hasta) {
-    searchData.value = {
-      desde: routerQuery.query.desde,
-      hasta: routerQuery.query.hasta
-    }
-    formData.value = { desde: {}, hasta: {} }
-  } else {
-    // Retrieve the serialized data
-    const serializedData = sessionStorage.getItem('formData')
-    if (serializedData) {
-      try {
-        formData.value = JSON.parse(serializedData)
-        searchData.value = {
-          desde: formData.value.desde.id_estacion,
-          hasta: formData.value.hasta.id_estacion,
-          tipoBusqueda: formData.value.searchType,
-          fecha: formData.value.selectedDate,
-          hora: formData.value.selectedTime
-        }
-
-      } catch (e) {
-        console.error('Error parsing form data:', e)
-      }
-    }
+  // The URL is now the single source of truth for what search this page
+  // shows (desde/hasta plus the optional date/time/tipoBusqueda), so a
+  // copied or bookmarked link reproduces the same results. formData only
+  // carries the search *parameters* here (station objects get their
+  // .nombre backfilled below once the first result loads); searchData
+  // only ever needs the two station ids.
+  searchData.value = {
+    desde: routerQuery.query.desde,
+    hasta: routerQuery.query.hasta
   }
+  formData.value = {
+    desde: {},
+    hasta: {},
+    searchType: routerQuery.query.tipoBusqueda,
+    selectedDate: routerQuery.query.fecha,
+    selectedTime: routerQuery.query.hora
+  }
+
   trainArrivals.value = await searchStations()
   if (trainArrivals.value.total > 0 && !formData.value.desde?.nombre) {
     trainArrivals.value.results[0].servicio.estaciones.map((estacion) => {

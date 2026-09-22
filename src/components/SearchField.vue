@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue'
 import client from '@/api'
 import IconClose from './icons/IconClose.vue'
+import IconClock from './icons/IconClock.vue'
+import { recentStations } from '@/composables/useRecentStations'
 
 const props = defineProps({
   label: {
@@ -49,14 +51,61 @@ const searchStations = async (query) => {
 const inputValue = ref('');
 
 const filteredStations = ref([]);
+const isShowingRecents = ref(false);
+
+// Bumped by every focus/blur/input, and captured by handleInput before its
+// await. If a focus or blur happens while a typed search is still in
+// flight, the token no longer matches when that search resolves, so its
+// (now stale) results are discarded instead of overwriting whatever the
+// user is looking at by then — e.g. a freshly-opened recents list.
+let requestToken = 0;
 
 const handleInput = async (event) => {
   const value = event.target.value;
   inputValue.value = value;
-  filteredStations.value = await searchStations(value)
+  isShowingRecents.value = false;
+  const token = ++requestToken;
+  const results = await searchStations(value);
+  if (token !== requestToken) {
+    return;
+  }
+  filteredStations.value = results;
+};
+
+// Suggests recently-used stations when the field is focused with nothing
+// typed yet. Applies the same connectivity filter as typed searches
+// (relatedStation's shared ramales), plus excludes relatedStation itself
+// so the same station can't be suggested for both Desde and Hasta.
+const handleFocus = () => {
+  requestToken++;
+  if (inputValue.value) {
+    return;
+  }
+  const relatedRamales = props.relatedStation?.incluida_en_ramales;
+  const relatedId = props.relatedStation?.id_estacion;
+  filteredStations.value = recentStations.value.filter((station) => {
+    if (station.id_estacion === relatedId) {
+      return false;
+    }
+    if (!relatedRamales) {
+      return true;
+    }
+    return station.incluida_en_ramales.some((ramalId) => relatedRamales.includes(ramalId));
+  });
+  isShowingRecents.value = true;
+};
+
+// @mousedown.prevent on each suggestion <li> (see template) stops the
+// input from ever losing focus during a click-to-select, so this only
+// runs when focus actually leaves the field without picking anything.
+const handleBlur = () => {
+  requestToken++;
+  filteredStations.value = [];
+  isShowingRecents.value = false;
 };
 
 const handleSelect = (station) => {
+  requestToken++;
   emit('update:modelValue', station);
   inputValue.value = station.nombre;
   filteredStations.value = [];
@@ -81,6 +130,8 @@ const handleClear = () => {
         :value="inputValue"
         :placeholder="placeholder"
         @input="handleInput"
+        @focus="handleFocus"
+        @blur="handleBlur"
       />
       <button
         v-if="modelValue"
@@ -95,9 +146,11 @@ const handleClear = () => {
       <ul v-if="filteredStations.length" class="search-field__suggestions card">
         <li
           v-for="station in filteredStations"
-          :key="station.nombre"
+          :key="station.id_estacion"
+          @mousedown.prevent
           @click="handleSelect(station)"
         >
+          <IconClock v-if="isShowingRecents" class="search-field__recent-icon" />
           {{ station.nombre }}
         </li>
       </ul>
@@ -152,9 +205,17 @@ const handleClear = () => {
 }
 
 .search-field__suggestions li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   cursor: pointer;
   font-size: 0.9rem;
+}
+
+.search-field__recent-icon {
+  color: var(--color-muted);
+  flex-shrink: 0;
 }
 
 .search-field__suggestions li:hover {

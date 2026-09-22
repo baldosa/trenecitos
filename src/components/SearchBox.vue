@@ -7,6 +7,7 @@ import TimeSlotPicker from './TimeSlotPicker.vue'
 import IconSwap from './icons/IconSwap.vue'
 import IconChevronDown from './icons/IconChevronDown.vue'
 import IconSearch from './icons/IconSearch.vue'
+import { recordSearch } from '@/composables/useRecentStations'
 
 const router = useRouter()
 
@@ -61,9 +62,16 @@ const handleSubmit = () => {
   }
 
   if (!error.value) {
-    sessionStorage.setItem('formData', JSON.stringify(formData.value))
+    recordSearch({ desde: formData.value.desde, hasta: formData.value.hasta })
     router.push({
       name: 'trenes',
+      query: {
+        desde: formData.value.desde.id_estacion,
+        hasta: formData.value.hasta.id_estacion,
+        tipoBusqueda: formData.value.searchType,
+        fecha: formData.value.selectedDate,
+        hora: formData.value.selectedTime
+      }
     })
   }
 }
